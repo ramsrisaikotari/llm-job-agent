@@ -6,15 +6,16 @@ from fastapi.requests import Request
 from pydantic import BaseModel
 import openai
 
-# ✅ New SDK initialization
-client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+# ✅ Configure OpenRouter API Key and Endpoint
+openai.api_key = os.getenv("OPENROUTER_API_KEY")
+openai.base_url = "https://openrouter.ai/api/v1"  # Important!
 
 app = FastAPI()
 
-# ✅ CORS Configuration
+# ✅ Allow frontend (GitHub Pages) CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://ramsrisaikotari.github.io"],  # your GitHub Pages site
+    allow_origins=["https://ramsrisaikotari.github.io"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -31,12 +32,10 @@ class JobInput(BaseModel):
 def home():
     return {"message": "LLM Job Application Agent is live!"}
 
-# ✅ Handle preflight CORS requests (optional for extra safety)
 @app.options("/generate-cover-letter")
 async def preflight_handler(request: Request):
     return JSONResponse(content={"message": "CORS preflight passed"}, status_code=200)
 
-# ✅ Main API endpoint
 @app.post("/generate-cover-letter")
 def generate_letter(data: JobInput):
     prompt = (
@@ -48,8 +47,8 @@ def generate_letter(data: JobInput):
     )
 
     try:
-        response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
+        response = openai.ChatCompletion.create(
+            model="openai/gpt-3.5-turbo",  # Or try "mistralai/mixtral-8x7b", "openai/gpt-4", etc.
             messages=[
                 {"role": "system", "content": "You are an expert at writing tailored, ATS-optimized cover letters."},
                 {"role": "user", "content": prompt}
