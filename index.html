@@ -74,6 +74,14 @@
     <option value="French">French</option>
   </select>
 
+  <label for="model">Model (OpenRouter)</label>
+  <select id="model">
+    <option value="openai/gpt-3.5-turbo">GPT-3.5 Turbo</option>
+    <option value="openai/gpt-4">GPT-4</option>
+    <option value="mistralai/mixtral-8x7b">Mixtral 8x7B</option>
+    <option value="meta-llama/llama-3-70b-instruct">LLaMA 3 70B</option>
+  </select>
+
   <label for="resumeSummary">Resume Summary</label>
   <textarea id="resumeSummary" rows="6" placeholder="Paste your resume summary here..."></textarea>
 
@@ -100,6 +108,7 @@
       const language = document.getElementById('language').value;
       const resumeSummary = document.getElementById('resumeSummary').value;
       const jobDescription = document.getElementById('jobDescription').value;
+      const model = document.getElementById('model').value;
 
       const outputEl = document.getElementById('output');
       outputEl.readOnly = true;
@@ -115,7 +124,8 @@
           tone: tone,
           language: language,
           resume_summary: resumeSummary,
-          job_description: jobDescription
+          job_description: jobDescription,
+          model: model
         })
       });
 
