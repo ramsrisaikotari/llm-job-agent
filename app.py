@@ -27,6 +27,14 @@ class JobInput(BaseModel):
 def home():
     return {"message": "LLM Job Application Agent is live!"}
 
+from fastapi.responses import JSONResponse
+from fastapi.requests import Request
+
+@app.options("/generate-cover-letter")
+async def preflight_handler(request: Request):
+    return JSONResponse(content={"message": "CORS preflight passed"}, status_code=200)
+
+
 @app.post("/generate-cover-letter")
 def generate_letter(data: JobInput):
     prompt = (
