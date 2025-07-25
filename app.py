@@ -5,12 +5,15 @@ from pydantic import BaseModel
 
 app = FastAPI()
 
-# Load API key securely from environment variable
+# Load API key securely
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 class JobInput(BaseModel):
     job_description: str
     resume_summary: str
+    tone: str = "professional"     # Optional field with default
+    language: str = "English"
+    job_title: str = "Software Engineer"
 
 @app.get("/")
 def home():
@@ -19,11 +22,10 @@ def home():
 @app.post("/generate-cover-letter")
 def generate_letter(data: JobInput):
     prompt = (
-        f"You are a job applicant with the following background:\n"
-        f"{data.resume_summary}\n\n"
-        f"Write a personalized cover letter tailored to this job description:\n"
-        f"{data.job_description}\n\n"
-        f"Make it concise (under 300 words), professional, and avoid repetition."
+        f"Write a {data.tone} cover letter in {data.language} for the job title '{data.job_title}'.\n\n"
+        f"Job Description:\n{data.job_description}\n\n"
+        f"Resume Summary:\n{data.resume_summary}\n\n"
+        f"Make it concise (under 300 words), professional, well-structured, and avoid repetition."
     )
 
     try:
@@ -34,7 +36,7 @@ def generate_letter(data: JobInput):
                 {"role": "user", "content": prompt}
             ],
             temperature=0.7,
-            max_tokens=500
+            max_tokens=600
         )
         return {"cover_letter": response['choices'][0]['message']['content'].strip()}
     except Exception as e:
