@@ -18,3 +18,7 @@ def generate_letter(data: JobInput):
     
     # Placeholder response - replace with actual OpenAI API call if needed
     return {"cover_letter": "Dear Hiring Manager, I am excited to apply for this role..."}
+@app.get("/")
+def home():
+    return {"message": "LLM Job Application Agent is live!"}
+
