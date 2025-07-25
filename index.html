@@ -5,66 +5,99 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>LLM Job Application Agent</title>
   <style>
-    body { font-family: Arial, sans-serif; max-width: 900px; margin: 2rem auto; padding: 1rem; background-color: #f9f9f9; }
-    h1 { text-align: center; color: #333; }
-    textarea, input, select { width: 100%; margin: 10px 0; padding: 10px; font-size: 1rem; }
-    button { padding: 10px 20px; font-size: 1rem; background: #4CAF50; color: white; border: none; cursor: pointer; }
-    button:hover { background-color: #45a049; }
-    #result { margin-top: 2rem; padding: 1rem; background: white; border: 1px solid #ccc; white-space: pre-wrap; }
-    label { font-weight: bold; margin-top: 1rem; display: block; }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 2rem;
+      background-color: #f9f9f9;
+    }
+    input, select, textarea, button {
+      width: 100%;
+      padding: 0.8rem;
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .output {
+      white-space: pre-wrap;
+      background-color: #fff;
+      border: 1px solid #ccc;
+      padding: 1rem;
+      border-radius: 5px;
+    }
   </style>
 </head>
 <body>
   <h1>LLM Job Application Agent</h1>
 
   <label for="jobTitle">Job Title</label>
-  <input type="text" id="jobTitle" value="AI Engineer" />
+  <input type="text" id="jobTitle" placeholder="e.g., AI Engineer" />
 
   <label for="tone">Tone</label>
   <select id="tone">
     <option value="Professional">Professional</option>
+    <option value="Conversational">Conversational</option>
+    <option value="Confident">Confident</option>
     <option value="Friendly">Friendly</option>
-    <option value="Formal">Formal</option>
-    <option value="Persuasive">Persuasive</option>
   </select>
 
   <label for="language">Language</label>
-  <input type="text" id="language" value="English" />
+  <select id="language">
+    <option value="English">English</option>
+    <option value="Spanish">Spanish</option>
+    <option value="French">French</option>
+  </select>
 
-  <label for="resume">Resume Summary</label>
-  <textarea id="resume" rows="6" placeholder="Paste your resume summary here..."></textarea>
+  <label for="resumeSummary">Resume Summary</label>
+  <textarea id="resumeSummary" rows="6" placeholder="Paste your resume summary here..."></textarea>
 
-  <label for="jd">Job Description</label>
-  <textarea id="jd" rows="6" placeholder="Paste the job description here..."></textarea>
+  <label for="jobDescription">Job Description</label>
+  <textarea id="jobDescription" rows="6" placeholder="Paste the job description here..."></textarea>
 
-  <button onclick="generate()">Generate Cover Letter</button>
+  <button onclick="generateLetter()">Generate Cover Letter</button>
 
-  <div id="result"></div>
+  <h2>Generated Cover Letter</h2>
+  <div id="output" class="output">Your cover letter will appear here...</div>
 
   <script>
-    async function generate() {
-      const resultDiv = document.getElementById("result");
-      resultDiv.innerHTML = "⏳ Generating...";
+    async function generateLetter() {
+      const jobTitle = document.getElementById('jobTitle').value;
+      const tone = document.getElementById('tone').value;
+      const language = document.getElementById('language').value;
+      const resumeSummary = document.getElementById('resumeSummary').value;
+      const jobDescription = document.getElementById('jobDescription').value;
 
-      const body = {
-        job_description: document.getElementById("jd").value,
-        resume_summary: document.getElementById("resume").value,
-        job_title: document.getElementById("jobTitle").value,
-        tone: document.getElementById("tone").value,
-        language: document.getElementById("language").value
-      };
+      document.getElementById('output').innerText = "⏳ Generating...";
 
-      const res = await fetch("https://llm-job-agent.onrender.com/generate-cover-letter", {
+      const response = await fetch("https://llm-job-agent.onrender.com/generate-cover-letter", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body)
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          job_title: jobTitle,
+          tone: tone,
+          language: language,
+          resume_summary: resumeSummary,
+          job_description: jobDescription
+        })
       });
 
-      const data = await res.json();
-      if (data.cover_letter) {
-        resultDiv.innerHTML = `<h2>Generated Cover Letter</h2><p>${data.cover_letter.replace(/\n/g, "<br>")}</p>`;
+      const result = await response.json();
+      if (result.cover_letter) {
+        document.getElementById('output').innerText = result.cover_letter;
       } else {
-        resultDiv.innerHTML = `<span style="color:red;">❌ Error: ${data.error}</span>`;
+        document.getElementById('output').innerText = "❌ Error: " + (result.error || "Unknown error");
       }
     }
   </script>
