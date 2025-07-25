@@ -49,7 +49,7 @@ def generate_letter(data: JobInput):
 
     try:
         response = client.chat.completions.create(
-            model="gpt-4",
+            model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "You are an expert at writing tailored, ATS-optimized cover letters."},
                 {"role": "user", "content": prompt}
