@@ -25,3 +25,7 @@ An intelligent agent that scans job boards, matches resume keywords, and auto-ge
 - End-to-end LLM agent pipeline
 - Personalized application generation
 - Confidential resume & JD matching system
+
+Live API: https://llm-job-agent.onrender.com  
+Swagger Docs: https://llm-job-agent.onrender.com/docs  
+Status: LLM Job Application Agent is live!
