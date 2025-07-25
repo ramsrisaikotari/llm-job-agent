@@ -11,9 +11,9 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 class JobInput(BaseModel):
     job_description: str
     resume_summary: str
-    tone: str = "professional"     # Optional field with default
-    language: str = "English"
     job_title: str = "Software Engineer"
+    tone: str = "Professional"
+    language: str = "English"
 
 @app.get("/")
 def home():
@@ -22,22 +22,29 @@ def home():
 @app.post("/generate-cover-letter")
 def generate_letter(data: JobInput):
     prompt = (
-        f"Write a {data.tone} cover letter in {data.language} for the job title '{data.job_title}'.\n\n"
+        f"You are a job applicant applying for the position of {data.job_title}. "
+        f"Your tone should be {data.tone}, and your letter must be in {data.language}.\n\n"
+        f"Background:\n{data.resume_summary}\n\n"
         f"Job Description:\n{data.job_description}\n\n"
-        f"Resume Summary:\n{data.resume_summary}\n\n"
-        f"Make it concise (under 300 words), professional, well-structured, and avoid repetition."
+        f"Write a customized, concise (under 300 words), professional cover letter tailored for this role."
     )
 
     try:
         response = openai.ChatCompletion.create(
             model="gpt-4",
             messages=[
-                {"role": "system", "content": "You are a helpful assistant that writes excellent cover letters."},
+                {"role": "system", "content": "You are an expert at writing tailored, ATS-optimized cover letters."},
                 {"role": "user", "content": prompt}
             ],
             temperature=0.7,
             max_tokens=600
         )
-        return {"cover_letter": response['choices'][0]['message']['content'].strip()}
+        return {
+            "success": True,
+            "job_title": data.job_title,
+            "tone": data.tone,
+            "language": data.language,
+            "cover_letter": response['choices'][0]['message']['content'].strip()
+        }
     except Exception as e:
-        return {"error": str(e)}
+        return {"success": False, "error": str(e)}
