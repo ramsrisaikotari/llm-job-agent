@@ -1,20 +1,24 @@
 import os
-import openai
 from fastapi import FastAPI
-from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from fastapi.requests import Request
+from pydantic import BaseModel
+import openai
+
+# ✅ New SDK initialization
+client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 app = FastAPI()
+
+# ✅ CORS Configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://ramsrisaikotari.github.io"],  # or use ["*"] for testing
+    allow_origins=["https://ramsrisaikotari.github.io"],  # your GitHub Pages site
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# Load API key securely
-openai.api_key = os.getenv("OPENAI_API_KEY")
 
 class JobInput(BaseModel):
     job_description: str
@@ -27,14 +31,12 @@ class JobInput(BaseModel):
 def home():
     return {"message": "LLM Job Application Agent is live!"}
 
-from fastapi.responses import JSONResponse
-from fastapi.requests import Request
-
+# ✅ Handle preflight CORS requests (optional for extra safety)
 @app.options("/generate-cover-letter")
 async def preflight_handler(request: Request):
     return JSONResponse(content={"message": "CORS preflight passed"}, status_code=200)
 
-
+# ✅ Main API endpoint
 @app.post("/generate-cover-letter")
 def generate_letter(data: JobInput):
     prompt = (
@@ -46,7 +48,7 @@ def generate_letter(data: JobInput):
     )
 
     try:
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-4",
             messages=[
                 {"role": "system", "content": "You are an expert at writing tailored, ATS-optimized cover letters."},
@@ -60,7 +62,7 @@ def generate_letter(data: JobInput):
             "job_title": data.job_title,
             "tone": data.tone,
             "language": data.language,
-            "cover_letter": response['choices'][0]['message']['content'].strip()
+            "cover_letter": response.choices[0].message.content.strip()
         }
     except Exception as e:
         return {"success": False, "error": str(e)}
